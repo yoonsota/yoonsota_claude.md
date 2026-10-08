@@ -1,49 +1,98 @@
 ## Development Workflow
 
-The user explicitly starts each stage. Stay in the current stage until instructed otherwise.
+The user explicitly starts each of the four top-level stages: Research, Requirements, Development, and Final Quality. The main agent does not advance between these stages without user instruction.
 
-Only the main/controller agent manages workflow stages. Dispatched subagents follow only their assigned task and relevant task-scoped skills.
+Within the active stage, follow each skill's native workflow, including its internal transitions and approval requirements.
 
-1. **Research** — Run `deep-research`. If unavailable, use `mattpocock-skills:research` and identify the substitution.
+Only the main/controller agent manages workflow stages.
 
-   Research implementation options, technical constraints, relevant industry standards and established practices, and version compatibility. Prefer primary sources and save a cited report.
+When dispatching subagents, explicitly provide the task scope, approved constraints, relevant artifact paths, and required skills. Do not assume the parent's activated skills or conversation context are inherited.
 
-   **Complete when:** findings and unresolved questions are recorded.
+<SUBAGENT-STOP>
+If you are a dispatched subagent, ignore workflow stages 1–4. Follow your assigned task and relevant task-scoped skills. The Skill & Tool Routing and Graphify rules still apply within your task scope.
+</SUBAGENT-STOP>
 
-2. **Requirements** — Run `mattpocock-skills:grill-with-docs`. Use the Research artifacts to interview the user and finalize requirements, decisions, and acceptance criteria.
+### 1. Research
 
-   Use `mattpocock-skills:domain-modeling` when domain terminology, glossary, or ADR work is needed.
+Run `deep-research`. If unavailable, use `mattpocock-skills:research` and identify the substitution.
 
-   **Complete when:** the user confirms shared understanding and the approved requirements have an identifiable source.
+Research implementation options, technical constraints, relevant industry standards and established practices, and version compatibility. Prefer primary sources and save a cited report.
 
-3. **Development** — Run `superpowers:using-superpowers` and follow the workflow it selects.
+**Complete when:** Findings, supporting sources, technical constraints, and unresolved questions are recorded in an identifiable Research artifact.
 
-   Reuse Research and Requirements artifacts. Revisit only unresolved, changed, or contradictory points.
+### 2. Requirements
 
-   Apply `andrej-karpathy-skills:karpathy-guidelines` throughout Development for implementation, refactoring, simplification, and review.
+Run `mattpocock-skills:grill-with-docs`. Use available Research artifacts to interview the user and finalize requirements, decisions, and acceptance criteria.
 
-   **Complete when:** the selected Superpowers workflow completes its native process.
+Use `mattpocock-skills:domain-modeling` when domain terminology, glossary, or ADR work is needed.
 
-4. **Final Quality** — After Development is complete, perform one additional independent refinement pass using the approved requirements/spec, actual Git diff, and actual test results as the sources of truth.
+Persist the approved requirements, implementation decisions, scope, and testable acceptance criteria in an identifiable Spec document. Reuse existing approved specifications when sufficient.
 
-   - Run `code-simplifier:code-simplifier`.
-   - Run `mattpocock-skills:code-review` for Standards and Spec.
-   - Resolve significant findings and re-run affected tests and verification.
-   - Re-run affected reviews after material changes.
+**Complete when:** The user confirms shared understanding, an approved Spec is recorded, and no unresolved decisions block Development.
 
-   **Complete when:** the final result matches the approved requirements/spec, required tests and verification pass, significant findings are resolved or dispositioned, and no confirmed blocker remains.
+### 3. Development
+
+Run `superpowers:using-superpowers` and follow its selected workflow (Spike, Bounded, or Architectural — SDD/Native).
+
+Build on existing Research and Requirements artifacts, revisiting assumptions when new evidence warrants it.
+
+Apply `andrej-karpathy-skills:karpathy-guidelines` throughout development, including implementation and code review. Keep changes simple, focused, and verifiable.
+
+When delegating implementation or review tasks, the main agent must explicitly provide `andrej-karpathy-skills:karpathy-guidelines` to the relevant subagents.
+
+Defer branch finalization until after Final Quality.
+
+**Complete when:** The applicable Superpowers development, review, and verification steps are complete, with documented Spike findings or verified implementation results.
+
+### 4. Final Quality
+
+When the user explicitly starts Final Quality for implemented changes, perform one independent refinement pass using the approved requirements, actual Git diff, and actual test results as the sources of truth.
+
+1. **Simplification** — Dispatch `code-simplifier:code-simplifier` to simplify the implemented changes while preserving approved behavior and contracts.
+2. **Independent Review** — Run `mattpocock-skills:code-review` for Standards and Spec reviews. Use the approved Spec, repository standards, and full development diff. If no formal Spec exists, use the approved task requirements. Ensure uncommitted changes are also covered.
+3. **Verification** — Resolve significant findings and re-run affected tests and verification. Repeat affected reviews only when material changes require it.
+
+**Complete when:** The final result matches the approved requirements, affected tests and verification pass, significant findings are resolved or dispositioned, and no confirmed blocker remains.
+
+After Final Quality passes, run `superpowers:finishing-a-development-branch`. Present the available integration options and execute only the user's selected action.
 
 ### Skill & Tool Routing
 
-Reuse existing project evidence before additional external research.
+The following routing applies to both the main agent and subagents within their assigned tasks.
 
-- **Graphify:** Codebase exploration → follow the Graphify rules below.
-- **Context7 MCP:** Library APIs and version-specific behavior.
-- **GitHub MCP:** Upstream source, issues, releases, and history.
+Use existing project evidence as a starting point, not unquestionable authority. When credible concerns arise, use relevant skills and tools to verify assumptions and investigate alternatives. Subagents report significant conflicts to the main agent; changes to approved requirements require user approval.
+
+- **Graphify:** Codebase exploration and impact analysis → follow the Graphify rules below.
+- **Context7 MCP:** Library APIs, usage patterns, and version-specific behavior.
+- **GitHub MCP:** Upstream source, issues, releases, history, and implementation references.
 - **NVIDIA `nvidia-skill-finder`:** NVIDIA SDK, hardware, and platform-specific questions.
 - **Matt `codebase-design`:** Architecture and module boundaries.
 - **Matt `domain-modeling`:** Domain concepts and ADRs.
 - **Matt `writing-for-agents`:** Agent-facing instructions.
+
+**Examples by Stage**
+
+1. **Research**
+   - Investigate JetPack/DeepStream compatibility → NVIDIA + Context7.
+   - Compare upstream implementations, known issues, and releases → GitHub MCP.
+
+2. **Requirements**
+   - Clarify domain concepts, terminology, and architectural decisions → Matt `domain-modeling`.
+   - Define module responsibilities, interfaces, and boundaries → Matt `codebase-design`.
+
+3. **Development**
+   - Trace code relationships and assess change impact → Graphify.
+   - Resolve unexpected API behavior or implementation questions → Context7, GitHub MCP, or NVIDIA.
+   - Create or refine agent-facing project instructions → Matt `writing-for-agents`.
+
+4. **Final Quality**
+   - Investigate suspicious dependencies or unintended impacts discovered during review → Graphify.
+   - Verify questionable SDK usage, API contracts, or upstream behavior → Context7, GitHub MCP, or NVIDIA.
+   - Examine architectural concerns raised by reviewers → Matt `codebase-design`.
+
+These are examples, not mandatory tool calls. Select tools based on the task and available evidence.
+
+Skill and tool usage supports the current stage or delegated task; it does not authorize workflow transitions.
 
 ## graphify
 
