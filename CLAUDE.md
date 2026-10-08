@@ -66,7 +66,7 @@ Use existing project evidence as a starting point, not unquestionable authority.
 - **Context7 MCP:** Library APIs, usage patterns, and version-specific behavior.
 - **GitHub MCP:** Upstream source, issues, releases, history, and implementation references.
 - **NVIDIA `nvidia-skill-finder`:** NVIDIA SDK, hardware, and platform-specific questions.
-- **Matt `codebase-design`:** Architecture and module boundaries.
+- **Matt `codebase-design`:** Use as a supporting skill during Requirements or Superpowers brainstorming when module responsibilities, interface complexity, or architectural seams require deeper design analysis. Reuse approved design decisions and avoid unnecessary redesign.
 - **Matt `domain-modeling`:** Domain concepts and ADRs.
 - **Matt `writing-for-agents`:** Agent-facing instructions.
 
